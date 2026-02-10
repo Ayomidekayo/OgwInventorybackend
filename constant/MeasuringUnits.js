@@ -1,0 +1,22 @@
+// constants.js
+export const MEASURING_UNITS = [
+  "piece",
+  "pack",
+  "bundle",
+  "carton",
+  "crate",
+  "roll",
+  "litres",
+  "kilogram",
+  "gram",
+  "meter",
+  "box",
+  "container",
+  "bag",
+  "set",
+  "pair",
+  "sheet",
+  "tube",
+  "unit",
+  "pallet",
+];
