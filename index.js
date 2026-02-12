@@ -1,4 +1,3 @@
-// backend/index.js
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -20,7 +19,23 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors());
+// ✅ Configure CORS properly
+const allowedOrigins = [
+  "https://ogwfrontend-6fn5.vercel.app", // your deployed frontend
+  "http://localhost:3000"                // local dev
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+}));
+
 app.use(express.json());
 
 /* =========================
@@ -52,8 +67,8 @@ app.use(errorHandler);
 /* =========================
    EXPORT FOR VERCEL
 ========================= */
-//export default app;
+export default app;
 
-const PORT=process.env.PORT || 5000;
-
-app.listen(PORT, ()=>console.log(`Server running on port ${PORT}`))
+// Uncomment if running locally
+// const PORT = process.env.PORT || 5000;
+// app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
