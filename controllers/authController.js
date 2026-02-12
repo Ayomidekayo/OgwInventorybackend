@@ -7,50 +7,52 @@ export async function register(req, res) {
   try {
     const { name, email, password, role } = req.body;
     if (!name || !email || !password) {
-      return res.status(400).json({ message: 'All fields are required' });
+      return res.status(400).json({ message: "All fields are required" });
     }
 
     const normalizedEmail = email.trim().toLowerCase();
 
-    // Check if user already exists
     const exists = await User.findOne({ email: normalizedEmail });
-    if (exists) return res.status(400).json({ message: 'Email already exists' });
+    if (exists) return res.status(400).json({ message: "Email already exists" });
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
     const user = await User.create({
       name,
       email: normalizedEmail,
       password: hashedPassword,
-      role: role || 'user',
+      role: role || "user",
     });
-
-    // Notification for release
 
     // Send welcome email (non-blocking)
-   sendEmail({
-        to: normalizedEmail,
-        subject: "Welcome to Store Management!",
-        text: `Hi ${name}, your account has been created successfully.`,
-        html: `<p>Hi <strong>${name}</strong>, your account has been created successfully.</p>`,
-});
-
-
-    res.status(201).json({
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
+    sendEmail({
+      to: normalizedEmail,
+      subject: "Welcome to Store Management!",
+      text: `Hi ${name}, your account has been created successfully.`,
+      html: `<p>Hi <strong>${name}</strong>, your account has been created successfully.</p>`,
     });
 
+    // Generate JWT immediately
+    const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
+    res.status(201).json({
+      message: "Registration successful",
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
   } catch (error) {
-    console.error('Registration error:', error);
+    console.error("Registration error:", error);
     if (error.code === 11000) {
-      return res.status(400).json({ message: 'Email already exists' });
+      return res.status(400).json({ message: "Email already exists" });
     }
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
 }
 
