@@ -55,7 +55,7 @@ connectDB().catch((err) => {
    ROUTES
 ========================= */
 app.get("/", (req, res) => {
-  res.status(200).send("API is working");
+  res.status(200).send("API is");
 });
 
 app.use("/api/auth", authRoutes);
