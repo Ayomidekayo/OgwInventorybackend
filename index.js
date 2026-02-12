@@ -23,7 +23,7 @@ const app = express();
 
 const allowedOrigins = [
   "https://ogwfrontend-d4ga-5w5brc4tx-movie-apps-projects-4b57ba93.vercel.app", // deployed frontend
-  "http://localhost:3000" // local dev
+  ":http://localhost:5173/" // local dev
 ];
 
 app.use(cors({
@@ -50,7 +50,7 @@ connectDB().catch((err) => {
    ROUTES
 ========================= */
 app.get("/", (req, res) => {
-  res.status(200).send("API is working ✅");
+  res.status(200).send("API is working ");
 });
 
 app.use("/api/auth", authRoutes);
