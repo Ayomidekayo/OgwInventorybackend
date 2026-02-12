@@ -53,64 +53,53 @@ export async function register(req, res) {
     res.status(500).json({ message: 'Server error' });
   }
 }
+
+// Login Controller
 export async function login(req, res) {
   try {
     const { email, password } = req.body;
-    console.log('Login attempt:', { email, passwordLength: password?.length });
 
-    if (!email || !password) {
-      console.log('Missing email or password');
-      return res.status(400).json({ message: 'Email and password are required' });
-    }
+    // 1. Find user by email
+    const user = await User.findOne({ email });
 
-
-    const normalizedEmail = email.trim().toLowerCase();
-    console.log('Normalized Email:', normalizedEmail);
-
-    const user = await User.findOne({ email: normalizedEmail });
-    console.log('User found:', user ? { id: user._id, email: user.email } : null);
-  if (!user.active) {
-    return res.status(403).json({ message: "Your account is suspended. Please contact support." });
-  }
     if (!user) {
-      console.log('No user matches that email');
-      return res.status(401).json({ message: 'Invalid email or password' });
+      return res.status(404).json({ message: "User not found" });
     }
 
-    console.log('Stored password hash:', user.password);
+    // 2. Check if account is active
+    if (!user.active) {
+      return res.status(403).json({ message: "Account is inactive" });
+    }
 
+    // 3. Validate password
     const isMatch = await bcrypt.compare(password, user.password);
-    console.log('Password match result:', isMatch);
-
     if (!isMatch) {
-      console.log('Password does not match');
-      return res.status(401).json({ message: 'Invalid email or password' });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    console.log('Password matched — issuing token');
+    // 4. Generate JWT token
     const token = jwt.sign(
-      { id: user._id, role: user.role },
+      { id: user._id, email: user.email },
       process.env.JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: "1h" }
     );
-    console.log('Generated token:', token);
 
-    res.status(200).json({
-      message: 'Login successful',
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
-    });
-
+    // 5. Return success response
+   return res.status(200).json({
+  message: "Login successful",
+  token,
+  user: {
+    id: user._id,
+    email: user.email,
+    name: user.name,
+    role: user.role,   // ✅ ADD THIS
+  },
+});
   } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Login error:", error);
+    return res.status(500).json({ message: "Server error" });
   }
-}
+};
 
 // ✅ Get Logged-in User
 export const getMe = async (req, res) => {
