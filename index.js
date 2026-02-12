@@ -28,7 +28,8 @@ app.use(
       const allowedOrigins = [
         "http://localhost:5173",
         "https://ogwfrontend.vercel.app",
-        "https://ogwfrontend-rgfs-anbf8w46d-movie-apps-projects-4b57ba93.vercel.app"
+        "https://ogwfrontend-rgfs-anbf8w46d-movie-apps-projects-4b57ba93.vercel.app",
+        "https://ogwfrontend-d4ga-5w5brc4tx-movie-apps-projects-4b57ba93.vercel.app"
       ];
 
       if (!origin || allowedOrigins.includes(origin)) {
