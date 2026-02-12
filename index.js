@@ -21,8 +21,8 @@ const app = express();
 
 // ✅ Configure CORS properly
 const allowedOrigins = [
-  "https://ogwfrontend-6fn5.vercel.app", // your deployed frontend
-  "http://localhost:3000"                // local dev
+  "https://ogwfrontend-d4ga-5w5brc4tx-movie-apps-projects-4b57ba93.vercel.app", // deployed frontend
+  "http://localhost:3000" // local dev
 ];
 
 app.use(cors({
