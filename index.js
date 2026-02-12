@@ -3,7 +3,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 
-import { connectDB } from "./config/db.js";   // ✅ use the external db config
+import { connectDB } from "./config/db.js";
 import { errorHandler } from "./middlewares/errorMiddlewre.js";
 
 import authRoutes from "./routes/authRoutes.js";
@@ -26,7 +26,9 @@ app.use(express.json());
 /* =========================
    DATABASE CONNECTION
 ========================= */
-await connectDB();   // ✅ only call the imported function
+connectDB().catch((err) => {
+  console.error("❌ MongoDB connection failed:", err.message);
+});
 
 /* =========================
    ROUTES
