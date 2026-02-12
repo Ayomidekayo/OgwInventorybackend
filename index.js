@@ -34,7 +34,10 @@ async function startServer() {
     const app = express();
     app.use(cors());
     app.use(express.json());
-
+ // Simple test route
+    app.get("/", (req, res) => {
+      res.send("API is working ✅");
+    });
     // Routes
     app.use("/api/auth", authRoutes);
     app.use("/api/user", userRoutes);
@@ -48,10 +51,7 @@ async function startServer() {
 
     app.use(errorHandler);
 
-    // Simple test route
-    app.get("/", (req, res) => {
-      res.send("API is working ✅");
-    });
+   
 
     // Create HTTP server
     const server = http.createServer(app);
