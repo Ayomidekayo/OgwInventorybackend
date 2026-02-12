@@ -23,16 +23,15 @@ const app = express();
    ✅ PROPER CORS CONFIG
 ========================= */
 
-const allowedOrigins = [
-  "https://ogwfrontend-d4ga-git-main-movie-apps-projects-4b57ba93.vercel.app",
-  "https://ogwfrontend-d4ga-5w5brc4tx-movie-apps-projects-4b57ba93.vercel.app",
-  "http://localhost:5173"
-];
-
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (
+        !origin ||
+        origin === "http://localhost:5173" ||
+        origin === "https://ogwfrontend.vercel.app" ||
+        origin.endsWith(".vercel.app")
+      ) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));
