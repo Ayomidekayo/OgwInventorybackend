@@ -19,23 +19,28 @@ dotenv.config();
 
 const app = express();
 
-// ✅ Configure CORS properly
+/* =========================
+   ✅ PROPER CORS CONFIG
+========================= */
 
 const allowedOrigins = [
-  "https://ogwfrontend-d4ga-5w5brc4tx-movie-apps-projects-4b57ba93.vercel.app", // deployed frontend
-  ":http://localhost:5173/" // local dev
+  "https://ogwfrontend-d4ga-git-main-movie-apps-projects-4b57ba93.vercel.app",
+  "https://ogwfrontend-d4ga-5w5brc4tx-movie-apps-projects-4b57ba93.vercel.app",
+  "http://localhost:5173"
 ];
 
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 
@@ -50,7 +55,7 @@ connectDB().catch((err) => {
    ROUTES
 ========================= */
 app.get("/", (req, res) => {
-  res.status(200).send("API is working ");
+  res.status(200).send("API is working");
 });
 
 app.use("/api/auth", authRoutes);
@@ -69,7 +74,3 @@ app.use(errorHandler);
    EXPORT FOR VERCEL
 ========================= */
 export default app;
-
-// Uncomment if running locally
-// const PORT = process.env.PORT || 5000;
-// app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
