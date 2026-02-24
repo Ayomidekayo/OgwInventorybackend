@@ -17,9 +17,7 @@ export const addItem = async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // const existing = await Item.findOne({ name });
-    // if (existing) return res.status(400).json({ message: "Item already exists" });
-
+    // Create item
     const newItem = await Item.create({
       name,
       category,
@@ -29,20 +27,66 @@ export const addItem = async (req, res) => {
       addedBy: req.user._id,
     });
 
+    // Log action
     await ActionLog.create({
       user: req.user._id,
       action: "add_item",
       details: { itemId: newItem._id, name },
     });
 
+    // Create notification
     await Notification.create({
       message: `New item added: ${name}`,
       item: newItem._id,
     });
 
-    res.status(201).json({ message: "Item added successfully", item: newItem });
+    // 🔍 Find Super Admin
+    const superAdmin = await User.findOne({ role: "superadmin" });
+
+    // 📧 Prepare recipients
+    const emailRecipients = [
+      process.env.ADMIN_EMAIL,
+      superAdmin?.email,
+      req.user?.email,
+    ].filter(Boolean);
+
+    // 📤 Send emails
+    for (const recipient of emailRecipients) {
+      try {
+        await Promise.all(
+  emailRecipients.map(recipient =>
+    sendEmail({
+      to: recipient,
+      subject: `Item Added: ${newItem.name}`,
+      html: emailTemplates.itemAdded({
+        item: newItem.name,
+        category: newItem.category,
+        quantity: newItem.quantity,
+        measuringUnit: newItem.measuringUnit,
+        addedBy: req.user.name,
+      }),
+    }).catch(err =>
+      console.error(`❌ Email failed for ${recipient}:`, err.message)
+    )
+  )
+);
+       
+      } catch (err) {
+        console.error(`❌ Email failed for ${recipient}:`, err.message);
+      }
+    }
+
+    res.status(201).json({
+      message: "Item added successfully",
+      item: newItem,
+    });
+
   } catch (error) {
-    res.status(500).json({ message: "Failed to add item", error: error.message });
+    console.error("Add Item Error:", error);
+    res.status(500).json({
+      message: "Failed to add item",
+      error: error.message,
+    });
   }
 };
 
@@ -57,7 +101,6 @@ export const getItems = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch items", error: error.message });
   }
 };
-
 
 
 // ✅ Get item by ID
