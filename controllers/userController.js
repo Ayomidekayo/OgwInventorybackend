@@ -3,6 +3,8 @@
 import mongoose from 'mongoose';
 import User from '../models/User.js';
 import bcrypt from "bcryptjs";
+import { emailTemplates } from '../utils/emailTemplates.js';
+import sendEmail from '../utils/sendEmail.js';
 //get all users
 export const getAllUsers=async(req,res)=>{
   try {
@@ -117,8 +119,9 @@ export const createUser = async (req, res) => {
     if (!name || !email || !password) {
       return res.status(400).json({ success: false, message: "All fields are required" });
     }
+    const normalizedEmail = email.trim().toLowerCase();
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       return res.status(400).json({ success: false, message: "User already exists" });
     }
@@ -128,13 +131,28 @@ export const createUser = async (req, res) => {
 
     const newUser = new User({
       name,
-      email,
+      email :normalizedEmail,
       password: hashedPassword,
       role: role || "user",
     });
 
     await newUser.save();
+    
+const createdBy = req.user?.role==="superadmin" ? req.user.name : "System";
+const emailContent=emailTemplates.welcomeEmail({ name, createdBy });
+try{
+  await sendEmail({
+      to: normalizedEmail,
+      subject: emailContent.subject,
+      text: emailContent.text,
+      html: emailContent.html,
+    });
+    console.log(`✅ Welcome email sent to ${normalizedEmail}`);
 
+}catch(error){
+  console.error(`❌ Failed to send welcome email to ${normalizedEmail}` , error.message);
+}
+    
     res.status(201).json({
       success: true,
       message: "User created successfully",
@@ -143,6 +161,7 @@ export const createUser = async (req, res) => {
         name: newUser.name,
         email: newUser.email,
         role: newUser.role,
+        createdBy: createdBy
       },
     });
   } catch (error) {

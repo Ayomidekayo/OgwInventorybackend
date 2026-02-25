@@ -161,4 +161,62 @@ export const emailTemplates = {
     </div>
   </div>
   `,
+
+
+  // utils/emailTemplates.js
+ welcomeEmail : ({ name, createdBy }) => {
+  const createdText = createdBy
+    ? `Your account was created by ${createdBy}.`
+    : `Your account has been created successfully.`;
+
+  return {
+    subject: "🎉 Welcome to OGW Store Management",
+    text: `Hi ${name}, ${createdText} You can now login and manage your inventory.`,
+    html: `
+    <div style="font-family: Arial, sans-serif; background-color: #f4f6f8; padding: 40px 0;">
+      <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+
+        <!-- Header -->
+        <div style="background: #1f2937; padding: 20px; text-align: center;">
+          <h1 style="color: #ffffff; margin: 0;">OGW Store Management</h1>
+        </div>
+
+        <!-- Body -->
+        <div style="padding: 30px;">
+          <h2 style="color: #111827;">Welcome, ${name}! 👋</h2>
+
+          <p style="color: #4b5563; line-height: 1.6;">
+            ${createdText}
+            You can now access your dashboard and start managing
+            inventory, releases, returns, and reports.
+          </p>
+
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="https://ogwinventorysystem.vercel.app/login"
+              style="background: #2563eb;
+                     color: #ffffff;
+                     padding: 12px 24px;
+                     text-decoration: none;
+                     border-radius: 6px;
+                     font-weight: bold;">
+              Login to Dashboard
+            </a>
+          </div>
+
+          <p style="color: #6b7280; font-size: 14px;">
+            If you did not create this account, please ignore this email.
+          </p>
+        </div>
+
+        <!-- Footer -->
+        <div style="background: #f9fafb; padding: 20px; text-align: center; font-size: 12px; color: #9ca3af;">
+          © ${new Date().getFullYear()} OGW Store Management. All rights reserved.
+        </div>
+
+      </div>
+    </div>
+    `,
+  };
+},
 };
+
