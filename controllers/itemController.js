@@ -8,7 +8,87 @@ import User from "../models/User.js";
 import sendEmail from '../utils/sendEmail.js';
 import { emailTemplates } from "../utils/emailTemplates.js";
 
-// ✅ Create new item
+// Create new item
+// export const addItem = async (req, res) => {
+//   try {
+//     const { name, category, quantity, measuringUnit, description } = req.body;
+
+//     if (!name || !category || !quantity || !measuringUnit) {
+//       return res.status(400).json({ message: "Missing required fields" });
+//     }
+
+//     // Create item
+//     const newItem = await Item.create({
+//       name,
+//       category,
+//       quantity,
+//       measuringUnit,
+//       description: description || "",
+//       addedBy: req.user._id,
+//     });
+
+//     // Log action
+//     await ActionLog.create({
+//       user: req.user._id,
+//       action: "add_item",
+//       details: { itemId: newItem._id, name },
+//     });
+
+//     // Create notification
+//     await Notification.create({
+//       message: `New item added: ${name}`,
+//       item: newItem._id,
+//     });
+
+//     // 🔍 Find Super Admin
+//     const superAdmin = await User.findOne({ role: "superadmin" });
+
+//     // 📧 Prepare recipients
+//     const emailRecipients = [
+//       process.env.ADMIN_EMAIL,
+//       superAdmin?.email,
+//       req.user?.email,
+//     ].filter(Boolean);
+
+//     // 📤 Send emails
+//     for (const recipient of emailRecipients) {
+//       try {
+//         await Promise.all(
+//   emailRecipients.map(recipient =>
+//     sendEmail({
+//       to: recipient,
+//       subject: `Item Added: ${newItem.name}`,
+//       html: emailTemplates.itemAdded({
+//         item: newItem.name,
+//         category: newItem.category,
+//         quantity: newItem.quantity,
+//         measuringUnit: newItem.measuringUnit,
+//         addedBy: req.user.name,
+//       }),
+//     }).catch(err =>
+//       console.error(`❌ Email failed for ${recipient}:`, err.message)
+//     )
+//   )
+// );
+       
+//       } catch (err) {
+//         console.error(`❌ Email failed for ${recipient}:`, err.message);
+//       }
+//     }
+
+//     res.status(201).json({
+//       message: "Item added successfully",
+//       item: newItem,
+//     });
+
+//   } catch (error) {
+//     console.error("Add Item Error:", error);
+//     res.status(500).json({
+//       message: "Failed to add item",
+//       error: error.message,
+//     });
+//   }
+// };
 export const addItem = async (req, res) => {
   try {
     const { name, category, quantity, measuringUnit, description } = req.body;
@@ -40,40 +120,39 @@ export const addItem = async (req, res) => {
       item: newItem._id,
     });
 
-    // 🔍 Find Super Admin
-    const superAdmin = await User.findOne({ role: "superadmin" });
+    // 🔍 Find all Super Admins
+    const superAdmins = await User.find({ role: "superadmin" });
 
     // 📧 Prepare recipients
     const emailRecipients = [
       process.env.ADMIN_EMAIL,
-      superAdmin?.email,
       req.user?.email,
+      ...superAdmins.map(sa => sa.email),
     ].filter(Boolean);
 
-    // 📤 Send emails
-    for (const recipient of emailRecipients) {
-      try {
-        await Promise.all(
-  emailRecipients.map(recipient =>
-    sendEmail({
-      to: recipient,
-      subject: `Item Added: ${newItem.name}`,
-      html: emailTemplates.itemAdded({
-        item: newItem.name,
-        category: newItem.category,
-        quantity: newItem.quantity,
-        measuringUnit: newItem.measuringUnit,
-        addedBy: req.user.name,
-      }),
-    }).catch(err =>
-      console.error(`❌ Email failed for ${recipient}:`, err.message)
-    )
-  )
-);
-       
-      } catch (err) {
-        console.error(`❌ Email failed for ${recipient}:`, err.message);
-      }
+    // 📤 Send emails to all recipients
+    try {
+      await Promise.all(
+        emailRecipients.map(recipient =>
+          sendEmail({
+            to: recipient,
+            subject: `Item Added: ${newItem.name}`,
+            html: emailTemplates.itemAdded({
+              item: newItem.name,
+              category: newItem.category,
+              quantity: newItem.quantity,
+              measuringUnit: newItem.measuringUnit,
+              addedBy: req.user.name,
+            }),
+          }).then(() => {
+            console.log(`✅ Email sent to ${recipient}`);
+          }).catch(err => {
+            console.error(`❌ Email failed for ${recipient}:`, err.message);
+          })
+        )
+      );
+    } catch (err) {
+      console.error("❌ Email sending error:", err.message);
     }
 
     res.status(201).json({
