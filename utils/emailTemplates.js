@@ -30,7 +30,7 @@ export const emailTemplates = {
         </table>
 
         <div style="text-align:center;margin-top:25px;">
-          <a href="#" style="background:#1e3a8a;color:#ffffff;padding:10px 20px;border-radius:5px;text-decoration:none;font-weight:bold;">
+          <a href="https://ogwinventorysystem.vercel.app/login" style="background:#1e3a8a;color:#ffffff;padding:10px 20px;border-radius:5px;text-decoration:none;font-weight:bold;">
             View Inventory
           </a>
         </div>
