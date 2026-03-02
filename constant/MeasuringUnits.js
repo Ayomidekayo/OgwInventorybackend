@@ -11,6 +11,7 @@ export const MEASURING_UNITS = [
   "gram",
   "meter",
   "box",
+  "keg",
   "container",
   "bag",
   "set",
